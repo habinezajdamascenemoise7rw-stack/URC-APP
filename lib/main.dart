@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 void main() {
   runApp(const URCApp());
@@ -39,24 +40,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final pages = [
       const Home(),
-      const Center(
-        child: Text(
-          'Trending',
-          style: TextStyle(fontSize: 28),
-        ),
-      ),
-      const Center(
-        child: Text(
-          'Upload a video',
-          style: TextStyle(fontSize: 28),
-        ),
-      ),
-      const Center(
-        child: Text(
-          'Profile',
-          style: TextStyle(fontSize: 28),
-        ),
-      ),
+      const TrendingPage(),
+      const UploadPage(),
+      const ProfilePage(),
     ];
 
     return Scaffold(
@@ -172,6 +158,284 @@ class Home extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class TrendingPage extends StatelessWidget {
+  const TrendingPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text(
+        'Trending',
+        style: TextStyle(fontSize: 28),
+      ),
+    );
+  }
+}
+
+class UploadPage extends StatefulWidget {
+  const UploadPage({super.key});
+
+  @override
+  State<UploadPage> createState() => _UploadPageState();
+}
+
+class _UploadPageState extends State<UploadPage> {
+  final ImagePicker picker = ImagePicker();
+
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController descriptionController =
+      TextEditingController();
+
+  String category = 'Entertainment';
+  XFile? selectedVideo;
+
+  Future<void> pickVideo() async {
+    final video = await picker.pickVideo(
+      source: ImageSource.gallery,
+    );
+
+    if (video != null) {
+      setState(() {
+        selectedVideo = video;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  void publishVideo() {
+    if (selectedVideo == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a video first.'),
+        ),
+      );
+      return;
+    }
+
+    if (titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a video title.'),
+        ),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Video ready to publish. Cloud upload comes next.',
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        const Text(
+          'Upload Video',
+          style: TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'Share your story with the URC community.',
+          style: TextStyle(
+            color: Colors.white.withOpacity(.65),
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        InkWell(
+          onTap: pickVideo,
+          borderRadius: BorderRadius.circular(22),
+          child: Container(
+            height: 190,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: Colors.white24,
+              ),
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFF17122A),
+                  Color(0xFF10242A),
+                ],
+              ),
+            ),
+            child: Center(
+              child: selectedVideo == null
+                  ? const Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.video_library_outlined,
+                          size: 52,
+                        ),
+                        SizedBox(height: 12),
+                        Text(
+                          'Choose a video',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text('Tap to select from your phone'),
+                      ],
+                    )
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          size: 52,
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Video selected',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                          ),
+                          child: Text(
+                            selectedVideo!.name,
+                            maxLines: 2,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 22),
+
+        TextField(
+          controller: titleController,
+          decoration: InputDecoration(
+            labelText: 'Video title',
+            hintText: 'Give your video a title',
+            prefixIcon: const Icon(Icons.title),
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        TextField(
+          controller: descriptionController,
+          maxLines: 4,
+          decoration: InputDecoration(
+            labelText: 'Description',
+            hintText: 'Tell viewers about your video...',
+            alignLabelWithHint: true,
+            prefixIcon: const Padding(
+              padding: EdgeInsets.only(bottom: 55),
+              child: Icon(Icons.description_outlined),
+            ),
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        DropdownButtonFormField<String>(
+          value: category,
+          decoration: InputDecoration(
+            labelText: 'Category',
+            prefixIcon: const Icon(Icons.category_outlined),
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+          ),
+          items: const [
+            'Gospel',
+            'Education',
+            'Entertainment',
+            'News',
+            'Sports',
+            'Music',
+            'Other',
+          ]
+              .map(
+                (item) => DropdownMenuItem(
+                  value: item,
+                  child: Text(item),
+                ),
+              )
+              .toList(),
+          onChanged: (value) {
+            if (value != null) {
+              setState(() => category = value);
+            }
+          },
+        ),
+
+        const SizedBox(height: 24),
+
+        FilledButton.icon(
+          onPressed: publishVideo,
+          icon: const Icon(Icons.cloud_upload_outlined),
+          label: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 14),
+            child: Text(
+              'Publish Video',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text(
+        'Profile',
+        style: TextStyle(fontSize: 28),
+      ),
     );
   }
 }

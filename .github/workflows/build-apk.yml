@@ -21,7 +21,7 @@ jobs:
         run: flutter pub get
 
       - name: Create Android platform
-        run: flutter create --platforms=android .
+        run: flutter create --platforms=android --org com.urc .
 
       - name: Build APK
         run: flutter build apk --release

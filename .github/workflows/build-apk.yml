@@ -31,3 +31,12 @@ jobs:
         with:
           name: urc-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Build Android App Bundle
+        run: flutter build appbundle --release
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: urc-aab
+          path: build/app/outputs/bundle/release/app-release.aab
